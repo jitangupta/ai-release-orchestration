@@ -58,6 +58,16 @@ RAG let's AI search your data in data in real time, like giving AI a perfect mem
 Cheaper, faster then fine tuning.<br>
 Most business AI application should start here.
 
+RAG is a pattern that retrieves relevant data via semantic search, 
+augments the LLM prompt with that context, then generates accurate responses.
+
+Process:
+1. RETRIEVE: Vector DB finds semantically similar documents
+2. AUGMENT: Inject retrieved docs + user query into prompt
+3. GENERATE: LLM produces answer using all context
+
+Cost consideration: Retrieved docs count as input tokens.
+
 ## APIs (Application Programming Interface)
 How softwares talks to software.<br>
 OpenAI APIs let's you send text and get AI responses back<br>
@@ -161,3 +171,29 @@ when prompting, RAG, fine-tuning isn't enough
 - Week 3: Applications (APIs, agents, function calling)
 - Week 4: Custom solutions (fine-tuning, deployment, monitoring)
 
+
+## Embeddings:
+converting text into numbers (numerical vectors) where similar meaning have similar numbers.
+Vector db is where we store these embedding and through semantic search we retrieve.
+RAG is a pattern of using semantic serach to retrieve embeddings from database, augmenting the prompt with retrieved context amd user's query to LLM
+where LLM generates the output.
+Temperature is used by LLM Model during output generation.
+user's query, system prompt, retrieved embedding are all considered as input token and generated output is considered as output token.
+
+## APIs - Integration Layer
+APIs let applications send prompts to AI models and receive responses programmatically.
+Moves AI from chat interface into your production systems (CRM, analytics, support).
+Pay per token (input + output).
+
+## Function Calling - Intent Detection + Parameter Extraction
+LLM detects when a function should be called and extracts structured parameters.
+YOUR code validates the request and executes the actual function.
+LLM never directly accesses your systems—you stay in control.
+Turns "book a meeting with Sarah tomorrow at 2pm" into validated function calls.
+
+## Agents - Goal-Oriented Multi-Step Execution
+Give AI a goal → it breaks into steps → calls functions → adapts based on results.
+Can iterate, revise plans, and use multiple tools to achieve objectives.
+Example: "Analyze AWS costs" → queries billing → detects spike → investigates 
+→ finds root cause → generates report.
+More autonomous but requires safety guardrails (step limits, approval workflows).
