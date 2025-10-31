@@ -29,21 +29,3 @@ The **subscription management** SaaS runs on Azure Kubernetes Service (AKS) with
 ## AI Orchestration System Architecture - Summary
 The AI recommendation engine is built on Azure AI Foundry, using GPT-4 for decision reasoning and natural language explanation generation. Jira ticket data (features, bugs, tech debt descriptions) are embedded using text-embedding-3-small and stored in Qdrant vector database for semantic search and retrieval. When a release stabilizes, the system retrieves relevant tickets based on tenant feature usage, constructs context-rich prompts, and invokes Azure OpenAI to generate MUST/SHOULD/SKIP recommendations with detailed justifications. The RAG pattern ensures the AI reasons only from actual release content, preventing hallucinations while enabling explainable decision-making that humans can audit before approving GitOps PRs.
 
-## Tenant Details
-
-
-## Release Details
-
-
-## Jira - Feature 
-Bug
-```
-Bug - raised by tenant (impacted tenant)
-    - bug priority
-    - 
-```
-Feature
-```
-Impacted Feature
-
-``` 
