@@ -1,0 +1,17 @@
+{
+  "issue_key": "JIRA-9016",
+  "issue_type": "Story",
+  "summary": "Implement support for Stripe ACH direct debit payment method (F4).",
+  "status": "Done",
+  "linked_feature_id": "F4_BillingPayments",
+  "priority": "High",
+  "description": "Tenant 'Alpha Solutions' requested the addition of Stripe ACH direct debit as a payment option to comply with their new financial standards. This requires frontend and backend integration with the Stripe API.",
+  "resolution_details": "Completed integration of the Stripe ACH API. Added new endpoints for payment source creation and updated the payment retry logic to handle ACH delays. Requires a minor Helm chart update for new secrets.",
+  "impacted_modules": ["billing-service", "payment-api", "helm-chart-f4"],
+  "customer_context": {
+    "customer_id": "T-ALPHA-050",
+    "is_key_account": false
+  },
+  "fix_version": "v1.6.0",
+  "release_notes_excerpt": "New Feature: Added support for Stripe ACH direct debit, providing a new, secure payment option for our customers."
+}

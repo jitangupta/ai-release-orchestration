@@ -1,0 +1,40 @@
+{
+  "release_version": "v1.5.0",
+  "release_date": "2025-11-01T10:00:00Z",
+  "deployment_complexity": "MEDIUM",
+  "required_predecessor_versions": [
+    "v2.3.0",
+    "v2.3.1"
+  ],
+  "release_summary": "Introduces F10 admin controls and addresses critical security vulnerabilities in F3 Proration Logic.",
+  "content_breakdown": [
+    {
+      "change_id": "JIRA-9012",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-9013",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F3_SubscriptionMgmt",
+      "severity": "CRITICAL",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-9014",
+      "change_type": "TECH_DEBT",
+      "linked_feature_id": "F4_BillingPayments",
+      "severity": "MINOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-9015",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F8_ReportingAnalytics",
+      "severity": "PATCH",
+      "deployment_impact": "NONE"
+    }
+  ]
+}

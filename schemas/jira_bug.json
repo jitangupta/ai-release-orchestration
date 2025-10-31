@@ -1,0 +1,17 @@
+{
+  "issue_key": "JIRA-9013",
+  "issue_type": "Bug",
+  "summary": "CRITICAL: Proration logic throws SQL error on plan downgrade (F3).",
+  "status": "Resolved",
+  "linked_feature_id": "F3_SubscriptionMgmt",
+  "priority": "Highest",
+  "description": "The Subscription Management API throws a fatal SQL constraint violation when processing a plan downgrade if the customer has more than 5 historical invoices. This was reported by our key account, T-CORP-401, leading to immediate revenue impact and failed operations for them.",
+  "resolution_details": "The proration query was optimized to use a subquery that handles historical invoice joins without locking the full table. The SQL constraint was relaxed and replaced with application-level validation. Full regression testing passed.",
+  "impacted_modules": ["subscription-service", "proration-engine", "azure-sql-schema-f3"],
+  "customer_context": {
+    "customer_id": "T-CORP-401",
+    "is_key_account": true
+  },
+  "fix_version": "v1.5.1",
+  "release_notes_excerpt": "Addresses a critical issue where plan downgrades could fail due to a database constraint error during proration calculation."
+}

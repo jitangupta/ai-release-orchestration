@@ -1,0 +1,19 @@
+{
+  "tenant_id": "T-ALPHA-050",
+  "tenant_name": "Alpha Solutions Inc.",
+  "deployment_type": "dedicated-namespace",
+  "current_version": "v1.4.1",
+  "risk_tolerance": "MEDIUM",
+  "active_features": [
+    "F1_Proration",
+    "F2_Webhooks",
+    "F4_Analytics"
+  ],
+  "daily_usage_score": 78,
+  "key_metrics_last_30_days": {
+    "total_subscriptions": 15000,
+    "active_api_users": 12,
+    "failed_jobs_percent": 0.05
+  },
+  "contact_slack_channel": "#alpha-solutions-alerts"
+}
