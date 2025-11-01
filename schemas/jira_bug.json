@@ -1,6 +1,7 @@
 {
   "issue_key": "JIRA-9013",
   "issue_type": "Bug",
+  "parent_issue_key": null,
   "summary": "CRITICAL: Proration logic throws SQL error on plan downgrade (F3).",
   "status": "Resolved",
   "linked_feature_id": "F3_SubscriptionMgmt",

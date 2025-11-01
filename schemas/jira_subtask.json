@@ -1,8 +1,8 @@
 {
-  "issue_key": "JIRA-9016",
-  "issue_type": "Story",
-  "parent_issue_key": null,
-  "summary": "Implement support for Stripe ACH direct debit payment method (F4).",
+  "issue_key": "JIRA-9016-1",
+  "issue_type": "Subtask",
+  "parent_issue_key": "JIRA-9016",
+  "summary": "Integrate Stripe ACH API endpoints",
   "status": "Done",
   "linked_feature_id": "F4_BillingPayments",
   "priority": "High",
