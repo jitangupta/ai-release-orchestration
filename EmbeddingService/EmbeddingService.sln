@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36603.0 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddingService", "EmbeddingService.csproj", "{D5BAD8CE-9E36-4999-89D3-7AB3B499BCC4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5BAD8CE-9E36-4999-89D3-7AB3B499BCC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5BAD8CE-9E36-4999-89D3-7AB3B499BCC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5BAD8CE-9E36-4999-89D3-7AB3B499BCC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5BAD8CE-9E36-4999-89D3-7AB3B499BCC4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A2FF603A-B4A7-4C7F-AB29-0C5BF43F73A5}
+	EndGlobalSection
+EndGlobal
