@@ -21,7 +21,17 @@ public class QdrantService
         _collectionName = configuration["Qdrant:CollectionName"]
             ?? throw new InvalidOperationException("Qdrant CollectionName not configured");
 
-        _client = new QdrantClient(new Uri(url), apiKey: apiKey);
+        // Extract host from URL and configure for HTTPS (Qdrant Cloud)
+        var uri = new Uri(url);
+        var host = uri.Host;
+        var port = uri.Port != -1 && uri.Port != 443 ? uri.Port : 6334; // Default Qdrant gRPC port
+
+        _client = new QdrantClient(
+            host: host,
+            port: port,
+            https: true, // Enable HTTPS for Qdrant Cloud
+            apiKey: apiKey
+        );
 
         _logger.LogInformation("Qdrant Service initialized for collection: {Collection}", _collectionName);
     }
