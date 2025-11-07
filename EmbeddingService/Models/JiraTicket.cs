@@ -86,6 +86,8 @@ public class JiraTicket
         {
             ["issue_key"] = IssueKey,
             ["issue_type"] = IssueType,
+            ["summary"] = Summary,
+            ["description"] = Description,
             ["linked_feature_id"] = LinkedFeatureId,
             ["priority"] = Priority,
             ["status"] = Status,
