@@ -1,0 +1,310 @@
+{
+  "release_version": "v1.6.0",
+  "release_date": "2025-12-15T10:00:00Z",
+  "deployment_complexity": "MEDIUM",
+  "required_predecessor_versions": ["v1.5.0"],
+  "release_summary": "Introduces F10 tenant administration controls and addresses critical security vulnerabilities in F3 Proration Logic and F4 Payment Processing. Major enhancements include AI-powered release management, multi-region deployment support, and comprehensive data isolation controls for regulatory compliance.",
+  "content_breakdown": [
+    {
+      "change_id": "JIRA-6001",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F3_SubscriptionMgmt",
+      "severity": "CRITICAL",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6002",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F4_BillingPayments",
+      "severity": "CRITICAL",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6003",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F6_InvoicingTax",
+      "severity": "CRITICAL",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6004",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F4_BillingPayments",
+      "severity": "CRITICAL",
+      "deployment_impact": "DB_MIGRATION"
+    },
+    {
+      "change_id": "JIRA-6005",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F3_SubscriptionMgmt",
+      "severity": "CRITICAL",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6006",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F1_Authentication",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6007",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F8_ReportingAnalytics",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6008",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F5_UsageTracking",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6009",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F7_NotificationsAlerts",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6010",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F6_InvoicingTax",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6011",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F9_APIIntegrations",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6012",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F4_BillingPayments",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6013",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F2_UserManagement",
+      "severity": "MINOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6014",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F7_NotificationsAlerts",
+      "severity": "MINOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6015",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F5_UsageTracking",
+      "severity": "MINOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6016",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F1_Authentication",
+      "severity": "PATCH",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6017",
+      "change_type": "BUG_FIX",
+      "linked_feature_id": "F9_APIIntegrations",
+      "severity": "PATCH",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6020",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6020-1",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6020-2",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6021",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6021-1",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6021-2",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6022",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6022-1",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6022-2",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6023",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6023-1",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6023-2",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6024",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6024-1",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6024-2",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6024-3",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6024-4",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6025",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6025-1",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6025-2",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6026",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6026-1",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6026-2",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "HELM_CHANGE"
+    },
+    {
+      "change_id": "JIRA-6027",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6027-1",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    },
+    {
+      "change_id": "JIRA-6027-2",
+      "change_type": "FEATURE",
+      "linked_feature_id": "F10_TenantAdmin",
+      "severity": "MAJOR",
+      "deployment_impact": "NONE"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+using Ai.Orchestrator.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configure HttpClient with proper timeout for Azure services
+builder.Services.AddHttpClient();
+
+builder.Services.AddSingleton<QdrantRetrieverService>();
+builder.Services.AddSingleton<LLMReasoningService>();
+builder.Services.AddSingleton<RecommendationEngine>();
 
 var app = builder.Build();
 
