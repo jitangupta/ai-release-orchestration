@@ -53,20 +53,20 @@ public class JiraTicket
     public string GetEmbeddingContent()
     {
         var content = $"""
+                Release Version: {FixVersion}
             Issue Key: {IssueKey}
             Type: {IssueType}
             Feature: {LinkedFeatureId}
             Priority: {Priority}
             Summary: {Summary}
-            
+
             Description:
             {Description}
-            
+
             Resolution:
             {ResolutionDetails}
-            
+
             Impacted Modules: {string.Join(", ", ImpactedModules)}
-            Fix Version: {FixVersion}
             """;
 
         if (!string.IsNullOrEmpty(ReleaseNotesExcerpt))
