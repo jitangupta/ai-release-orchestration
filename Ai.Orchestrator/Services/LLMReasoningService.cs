@@ -19,7 +19,7 @@ public class LLMReasoningService
 
         var client = new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
         _chatClient = client.GetChatClient(deploymentName);
-        _outputDirectory = configuration["OutputDirectory"] ?? "Data/generatedprompts";
+        _outputDirectory = configuration["PromptDirectory"] ?? "Data/generatedprompts";
     }
 
     public async Task<UpgradeRecommendation> GenerateRecommendationAsync(

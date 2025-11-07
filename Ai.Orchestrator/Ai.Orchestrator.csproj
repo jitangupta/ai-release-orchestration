@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Folder Include="Data\generatedprompts\" />
+    <Folder Include="Data\recommendations\" />
     <Folder Include="Models\" />
   </ItemGroup>
 
