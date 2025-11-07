@@ -1,0 +1,51 @@
+API Request body 
+https://localhost:7279/api/recommendations/generate
+```json
+{
+  "releaseVersion": "v1.6.0",
+  "tenantIds": [
+"T-SOUTH-051"
+,"T-SOUTH-052"
+  ]
+}
+```
+"T-ZETA-300"
+,"T-ETA-350"
+,"T-THETA-400"
+,"T-IOTA-450"
+,"T-KAPPA-500"
+,"T-LAMBDA-350"
+,"T-MU-600"
+,"T-NU-650"
+,"T-XI-700"
+,"T-OMICRON-750"
+,"T-SIGMA-400"
+,"T-TAU-450"
+,"T-UPSILON-500"
+,"T-PHI-550"
+,"T-CHI-600"
+,"T-PSI-650"
+,"T-OMEGA-300"
+,"T-APOLLO-100"
+,"T-ARTEMIS-150"
+,"T-ATHENA-200"
+,"T-HERMES-250"
+,"T-ZEUS-350"
+,"T-HERA-400"
+,"T-POSEIDON-450"
+,"T-DEMETER-500"
+,"T-ARES-550"
+,"T-EURO-500"
+,"T-EURO-600"
+,"T-NOVA-100"
+,"T-SPARK-150"
+,"T-PULSE-200"
+,"T-ZENITH-250"
+,"T-VORTEX-300"
+,"T-NEXUS-350"
+,"T-QUANTUM-400"
+,"T-VERTEX-450"
+,"T-CIPHER-500"
+,"T-APEX-550"
+,"T-KAPPA-200"
+,"T-ZETA-900"

@@ -1,0 +1,12 @@
+{
+  "TenantId": "T-POSEIDON-450",
+  "ReleaseVersion": "v1.6.0",
+  "Recommendation": "MUST",
+  "Reasoning": "The upgrade to v1.6.0 is strongly recommended as it addresses critical security vulnerabilities and data corruption bugs that directly affect the tenant\u0027s actively used features F3_SubscriptionMgmt and F4_BillingPayments. Specifically, bugs JIRA-6001 and JIRA-6005 involve critical issues with proration and cancellations that can lead to incorrect billing outcomes, which is essential for a billing-heavy tenant. Given the tenant\u0027s medium risk tolerance and active usage of these features, these critical issues necessitate an immediate upgrade.",
+  "AffectedFeatures": [
+    "F3_SubscriptionMgmt",
+    "F4_BillingPayments"
+  ],
+  "EstimatedImpact": "high",
+  "GeneratedAt": "2025-11-07T07:02:58.6256801Z"
+}

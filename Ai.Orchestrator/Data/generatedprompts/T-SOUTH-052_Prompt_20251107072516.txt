@@ -1,0 +1,111 @@
+
+You are analyzing whether tenant T-SOUTH-052 should upgrade to v1.6.0.
+
+**CRITICAL INSTRUCTION**: Use PROBABILISTIC REASONING. Don't just check if a feature has a bug - assess the LIKELIHOOD that this specific tenant is experiencing the bug based on their usage profile, risk tolerance, and bug characteristics.
+
+**Tenant Profile:**
+- Tenant ID: T-SOUTH-052
+- Active Features: F2_UserManagement, F9_APIIntegrations
+- Usage Pattern: medium
+- Risk Tolerance: high
+
+**Release: v1.6.0**
+- Deployment Complexity: MEDIUM
+- Release Summary: Introduces F10 tenant administration controls and addresses critical security vulnerabilities in F3 Proration Logic and F4 Payment Processing. Major enhancements include AI-powered release management, multi-region deployment support, and comprehensive data isolation controls for regulatory compliance.
+- Total Changes in Release: 43
+
+**Impact Analysis for This Tenant:**
+- **MAJOR Changes**: 1 affecting F9_APIIntegrations
+  Tickets: JIRA-6011
+- **MINOR Changes**: 1 affecting F2_UserManagement
+
+**Probabilistic Impact Assessment:**
+- HIGH risk tolerance + only MAJOR bugs + usage score 50 = LOW impact probability.
+- Likely SKIP unless: (1) high-frequency workflows affected, (2) data integrity risk, (3) compliance issue.
+
+
+**Detailed Relevant Tickets (RAG Results):**
+- [Bug] JIRA-6011: MAJOR: CRM integration stops syncing after OAuth token expires
+  Features: F9_APIIntegrations
+- [Bug] JIRA-6017: PATCH: API documentation portal broken anchor links
+  Features: F9_APIIntegrations
+- [Bug] JIRA-6013: MINOR: Profile page mobile layout broken on iOS Safari
+  Features: F2_UserManagement
+- [Bug] JIRA-6006: MAJOR: OAuth token refresh fails silently causing unexpected logouts
+  Features: F1_Authentication
+- [Bug] JIRA-6001: CRITICAL: Multi-year contract proration fails on mid-cycle plan change
+  Features: F3_SubscriptionMgmt
+- [Bug] JIRA-6002: CRITICAL: Stripe payment retry exhaustion causes incorrect charge reversal
+  Features: F4_BillingPayments
+- [Bug] JIRA-6004: CRITICAL: Payment method deletion cascade fails, orphans active subscriptions
+  Features: F4_BillingPayments
+
+**Probabilistic Decision Framework:**
+
+**MUST Upgrade** = HIGH probability (>70%) tenant is experiencing or will soon experience critical impact:
+1. CRITICAL security vulnerability in authentication/payment features they actively use
+2. CRITICAL data corruption/loss bugs in features with HIGH daily usage
+3. Widespread production-breaking bugs reported by multiple similar tenants
+4. Compliance violations with immediate legal/financial consequences
+5. LOW risk tolerance + CRITICAL bug in core business feature (subscription/billing)
+
+Examples:
+- ✓ MUST: Payment retry bug causing refunds → tenant uses F4_BillingPayments heavily
+- ✗ NOT MUST: Proration bug for multi-year contracts → tenant only has monthly subscriptions
+
+**SHOULD Upgrade** = MEDIUM probability (30-70%) of impact OR non-critical improvements worth deploying:
+1. MAJOR bugs in frequently used features that affect subset of workflows
+2. Edge case CRITICAL bugs tenant might encounter occasionally
+3. MEDIUM risk tolerance + CRITICAL bugs in lightly-used features
+4. Multiple MAJOR improvements that benefit tenant's workflow
+5. HIGH usage tenants with performance/stability MAJOR fixes
+
+Examples:
+- ✓ SHOULD: OAuth refresh bug → tenant uses F1 but may not hit edge case frequently
+- ✓ SHOULD: MRR calculation bug → tenant uses F8 reporting but not mission-critical
+- ✗ NOT SHOULD: Edge case bugs tenant unlikely to encounter
+
+**SKIP Upgrade** = LOW probability (<30%) of impact OR minimal benefit vs. deployment cost:
+1. Only MINOR/PATCH bugs in their features (UI typos, cosmetic issues)
+2. MAJOR/CRITICAL bugs in features they DON'T use at all
+3. HIGH risk tolerance + edge case bugs in non-core features
+4. New features tenant hasn't requested (no value, just deployment risk)
+5. LOW daily usage + only minor improvements
+6. MEDIUM/HIGH deployment complexity + minimal tangible benefit
+
+Examples:
+- ✓ SKIP: CRITICAL bug in F6_InvoicingTax → tenant doesn't use F6
+- ✓ SKIP: MAJOR bug in F5_UsageTracking quota reset → tenant has LOW usage, unlikely to hit quotas
+- ✓ SKIP: MINOR bug in F2_UserManagement → tenant has HIGH risk tolerance, cosmetic issue
+- ✓ SKIP: New F10_TenantAdmin features → tenant hasn't requested, no immediate value
+
+**Risk Tolerance Interpretation:**
+- LOW risk tolerance: Defensive - upgrade for CRITICAL bugs even if unlikely to impact (probability >30%)
+- MEDIUM risk tolerance: Balanced - upgrade if probability of impact >50%
+- HIGH risk tolerance: Aggressive - only upgrade if probability of impact >70% OR severe consequences
+
+**Usage Pattern Interpretation:**
+- HIGH usage (>70): Higher probability of hitting bugs → SHOULD for MAJOR bugs
+- MEDIUM usage (40-70): Standard probability assessment → focus on common workflows
+- LOW usage (<40): Lower probability of hitting bugs → SKIP unless CRITICAL security/data loss
+
+**Bug Likelihood Assessment Checklist:**
+1. Is this bug affecting a core workflow tenant uses daily? (YES = +40% probability)
+2. Is this bug widespread or an edge case? (Widespread = +30%, Edge case = +5%)
+3. Does tenant's profile match the bug's conditions? (Match = +30%, No match = -50%)
+4. Has tenant reported similar issues before? (If mentioned = +40%)
+5. Is this a data corruption/security bug vs. UX bug? (Data/Security = +20%)
+
+**Current Guidance:**
+- Default to SKIP unless you can articulate HIGH or MEDIUM probability of impact
+- Bug severity alone is NOT enough - assess tenant-specific likelihood
+- Consider: "Would this tenant notice if we don't upgrade?" If NO → SKIP
+- Consider: "Is the deployment risk worth the unlikely benefit?" If NO → SKIP
+
+**Output Format (JSON only):**
+{
+  "recommendation": "MUST|SHOULD|SKIP",
+  "reasoning": "State the PROBABILITY of impact and WHY. Example: 'SKIP: Only MAJOR bug in F5_UsageTracking (quota reset). Tenant has LOW usage (35 daily score), unlikely to hit quota limits. HIGH risk tolerance suggests waiting. No CRITICAL bugs in their features.'",
+  "affectedFeatures": ["feature1", "feature2"],
+  "estimatedImpact": "high|medium|low"
+}

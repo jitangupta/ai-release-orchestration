@@ -1,0 +1,11 @@
+{
+  "TenantId": "T-SOUTH-051",
+  "ReleaseVersion": "v1.6.0",
+  "Recommendation": "SKIP",
+  "Reasoning": "LOW probability of impact. The only MAJOR bug is in F5_UsageTracking related to quota limits not resetting properly. Given T-SOUTH-051\u0027s medium usage pattern, they are unlikely to frequently hit quota limits. Their high risk tolerance suggests they can afford to wait for a more critical upgrade without immediate consequences. There are no critical bugs affecting their actively used features.",
+  "AffectedFeatures": [
+    "F5_UsageTracking"
+  ],
+  "EstimatedImpact": "low",
+  "GeneratedAt": "2025-11-07T07:25:15.006805Z"
+}

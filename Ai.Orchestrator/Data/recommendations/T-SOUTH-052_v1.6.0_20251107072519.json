@@ -1,0 +1,12 @@
+{
+  "TenantId": "T-SOUTH-052",
+  "ReleaseVersion": "v1.6.0",
+  "Recommendation": "SKIP",
+  "Reasoning": "LOW probability of impact: Major bug (JIRA-6011) affects F9_APIIntegrations, which the tenant uses. However, their medium usage suggests a lower likelihood of encountering the bug. Additionally, with high risk tolerance, the tenant might not prioritize this upgrade. The minor change affecting F2_UserManagement is not critical. No critical bugs in core features that would necessitate an upgrade.",
+  "AffectedFeatures": [
+    "F2_UserManagement",
+    "F9_APIIntegrations"
+  ],
+  "EstimatedImpact": "low",
+  "GeneratedAt": "2025-11-07T07:25:19.2462049Z"
+}

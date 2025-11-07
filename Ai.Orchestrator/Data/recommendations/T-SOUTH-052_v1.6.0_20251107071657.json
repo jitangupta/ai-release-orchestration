@@ -1,0 +1,12 @@
+{
+  "TenantId": "T-SOUTH-052",
+  "ReleaseVersion": "v1.6.0",
+  "Recommendation": "SKIP",
+  "Reasoning": "While there are critical bugs reported in features used by other tenants, none of these bugs directly impact the active features for tenant T-SOUTH-052, which are F2_UserManagement and F9_APIIntegrations. The major bug JIRA-6011 concerning the F9_APIIntegrations feature suggests a significant issue with the integration but does not constitute a critical failure. Given the tenant\u0027s high risk tolerance and the medium deployment complexity, the likelihood of production-breaking impacts is low, and thus, an upgrade at this time is not necessary.",
+  "AffectedFeatures": [
+    "F2_UserManagement",
+    "F9_APIIntegrations"
+  ],
+  "EstimatedImpact": "low",
+  "GeneratedAt": "2025-11-07T07:16:57.0849141Z"
+}

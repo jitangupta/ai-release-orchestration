@@ -1,0 +1,11 @@
+{
+  "TenantId": "T-SOUTH-051",
+  "ReleaseVersion": "v1.6.0",
+  "Recommendation": "SHOULD",
+  "Reasoning": "The tenant T-SOUTH-051 should consider upgrading to v1.6.0 due to a major bug (JIRA-6008) related to quota limits that don\u0027t reset properly on subscription renewal in F5_UsageTracking, which is an actively used feature. Although there are critical security vulnerabilities addressed in other features (F3 Proration Logic and F4 Payment Processing), these do not impact this tenant\u0027s current usage as they are not using those specific features. Given the tenant\u0027s medium usage pattern and high-risk tolerance, the resolution of the major bug and potential performance improvements warrant a recommendation to upgrade.",
+  "AffectedFeatures": [
+    "F5_UsageTracking"
+  ],
+  "EstimatedImpact": "medium",
+  "GeneratedAt": "2025-11-07T07:16:53.7068555Z"
+}

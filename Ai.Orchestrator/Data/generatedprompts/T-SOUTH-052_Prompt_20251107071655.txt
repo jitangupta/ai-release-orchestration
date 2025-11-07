@@ -1,0 +1,87 @@
+
+You are analyzing whether tenant T-SOUTH-052 should upgrade to v1.6.0.
+
+**IMPORTANT**: Be conservative with MUST recommendations. Only recommend MUST if there are ACTUAL critical bugs affecting this tenant's usage.
+
+**Tenant Profile:**
+- Tenant ID: T-SOUTH-052
+- Active Features: F2_UserManagement, F9_APIIntegrations
+- Usage Pattern: medium
+- Risk Tolerance: high
+
+**Release: v1.6.0**
+- Deployment Complexity: MEDIUM
+- Release Summary: Introduces F10 tenant administration controls and addresses critical security vulnerabilities in F3 Proration Logic and F4 Payment Processing. Major enhancements include AI-powered release management, multi-region deployment support, and comprehensive data isolation controls for regulatory compliance.
+- Total Changes in Release: 43
+
+**Impact Analysis for This Tenant:**
+- **MAJOR Changes**: 1 affecting F9_APIIntegrations
+  Tickets: JIRA-6011
+- **MINOR Changes**: 1 affecting F2_UserManagement
+
+**Preliminary Assessment**: No CRITICAL issues, only MAJOR = likely SHOULD or SKIP depending on actual bug impact.
+
+**Detailed Relevant Tickets (RAG Results):**
+- [Bug] JIRA-6011: MAJOR: CRM integration stops syncing after OAuth token expires
+  Features: F9_APIIntegrations
+- [Bug] JIRA-6017: PATCH: API documentation portal broken anchor links
+  Features: F9_APIIntegrations
+- [Bug] JIRA-6013: MINOR: Profile page mobile layout broken on iOS Safari
+  Features: F2_UserManagement
+- [Bug] JIRA-6006: MAJOR: OAuth token refresh fails silently causing unexpected logouts
+  Features: F1_Authentication
+- [Bug] JIRA-6001: CRITICAL: Multi-year contract proration fails on mid-cycle plan change
+  Features: F3_SubscriptionMgmt
+- [Bug] JIRA-6002: CRITICAL: Stripe payment retry exhaustion causes incorrect charge reversal
+  Features: F4_BillingPayments
+- [Bug] JIRA-6004: CRITICAL: Payment method deletion cascade fails, orphans active subscriptions
+  Features: F4_BillingPayments
+
+**Enhanced Decision Framework:**
+
+**MUST Upgrade When:**
+1. CRITICAL security vulnerabilities in actively used features (e.g., authentication bypass, data leak)
+2. CRITICAL data corruption bugs affecting tenant's data (e.g., payment calculation errors for billing-heavy tenants)
+3. Production-breaking bugs that tenant is likely experiencing NOW
+4. Compliance violations that tenant must fix immediately
+5. LOW risk tolerance + CRITICAL bugs in any active feature
+
+**SHOULD Upgrade When:**
+1. MAJOR bug fixes in frequently used features
+2. Important performance improvements for high-usage tenants
+3. MEDIUM risk tolerance + CRITICAL bugs that don't impact current usage
+4. Multiple MAJOR improvements that benefit tenant's workflow
+5. Security patches that are important but not immediately exploitable
+6. CRITICAL bugs in features tenant uses lightly or infrequently
+
+**SKIP Upgrade When:**
+1. Only MINOR/LOW severity changes
+2. Changes to features tenant doesn't use at all
+3. HIGH risk tolerance + only non-critical improvements
+4. New features that tenant hasn't requested
+5. Performance improvements that don't affect tenant's usage pattern
+6. No bugs affecting tenant's specific use case
+7. HIGH deployment complexity + minimal tenant benefit
+
+**Risk Tolerance Interpretation:**
+- LOW risk tolerance: Upgrade for CRITICAL issues immediately, SHOULD for MAJOR issues
+- MEDIUM risk tolerance: Upgrade for CRITICAL + MAJOR issues impacting usage
+- HIGH risk tolerance: Only upgrade for severe production-breaking or security issues
+
+**Usage Pattern Interpretation:**
+- HIGH usage: More careful - SHOULD for important stability/performance fixes
+- MEDIUM usage: Standard evaluation - focus on bugs in used features
+- LOW usage: Can SKIP unless CRITICAL security or compliance issue
+
+**Current Guidance:**
+- If no tickets match tenant's features: Likely SKIP (unless deployment complexity is LOW and there are nice-to-have improvements)
+- If tickets are mostly for unused features: SKIP
+- Consider deployment impact: MEDIUM/HIGH complexity requires stronger justification
+
+**Output Format (JSON only):**
+{
+  "recommendation": "MUST|SHOULD|SKIP",
+  "reasoning": "Explain the decision based on actual ticket impact, NOT just feature overlap. Be specific about which bugs matter for THIS tenant.",
+  "affectedFeatures": ["feature1", "feature2"],
+  "estimatedImpact": "high|medium|low"
+}
