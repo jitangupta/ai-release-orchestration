@@ -10,9 +10,12 @@ public class LLMReasoningService
 {
     private readonly ChatClient _chatClient;
     private readonly string _outputDirectory;
+    private readonly ILogger<LLMReasoningService> _logger;
 
-    public LLMReasoningService(IConfiguration configuration)
+    public LLMReasoningService(IConfiguration configuration, ILogger<LLMReasoningService> logger)
     {
+        _logger = logger;
+
         var endpoint = configuration["AzureOpenAI:Endpoint"] ?? throw new ArgumentNullException("AzureOpenAI:Endpoint");
         var apiKey = configuration["AzureOpenAI:ApiKey"] ?? throw new ArgumentNullException("AzureOpenAI:ApiKey");
         var deploymentName = configuration["AzureOpenAI:ChatDeploymentName"] ?? throw new ArgumentNullException("AzureOpenAI:ChatDeploymentName");
@@ -20,25 +23,41 @@ public class LLMReasoningService
         var client = new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
         _chatClient = client.GetChatClient(deploymentName);
         _outputDirectory = configuration["PromptDirectory"] ?? "Data/generatedprompts";
+
+        _logger.LogInformation("LLMReasoningService initialized. Chat deployment: {Deployment}, Prompt directory: {PromptDirectory}",
+            deploymentName, _outputDirectory);
     }
 
     public async Task<UpgradeRecommendation> GenerateRecommendationAsync(
         TenantProfile tenant,
         ReleaseContext releaseContext)
     {
+        _logger.LogInformation("Generating recommendation for tenant {TenantId}, release {ReleaseVersion}",
+            tenant.TenantId, releaseContext.ReleaseVersion);
+
         var prompt = BuildPrompt(tenant, releaseContext);
+        _logger.LogDebug("Built prompt for tenant {TenantId}, prompt length: {Length} chars", tenant.TenantId, prompt.Length);
+
         await SavepromptsAsync(tenant, prompt);
+
         var messages = new List<ChatMessage>
         {
             new SystemChatMessage("You are an expert system that analyzes software releases and generates upgrade recommendations."),
             new UserChatMessage(prompt)
         };
 
+        _logger.LogInformation("Calling LLM for tenant {TenantId}", tenant.TenantId);
         var response = await _chatClient.CompleteChatAsync(messages);
         var content = response.Value.Content[0].Text;
+        _logger.LogDebug("LLM response received for tenant {TenantId}, response length: {Length} chars",
+            tenant.TenantId, content.Length);
 
         // Parse LLM response (expecting JSON)
-        return ParseRecommendation(content, tenant.TenantId, releaseContext.ReleaseVersion);
+        var recommendation = ParseRecommendation(content, tenant.TenantId, releaseContext.ReleaseVersion);
+        _logger.LogInformation("Parsed recommendation for tenant {TenantId}: {Recommendation}",
+            tenant.TenantId, recommendation.Recommendation);
+
+        return recommendation;
     }
 
     private async Task SavepromptsAsync(TenantProfile tenant, string prompt)
@@ -46,11 +65,16 @@ public class LLMReasoningService
         var fileName = $"{tenant.TenantId}_Prompt_{DateTime.UtcNow:yyyyMMddHHmmss}.txt";
         var filePath = Path.Combine(_outputDirectory, fileName);
 
+        _logger.LogDebug("Saving prompt to file: {FilePath}", filePath);
         await File.WriteAllTextAsync(filePath, prompt);
+        _logger.LogInformation("Saved prompt for tenant {TenantId} to {FilePath}", tenant.TenantId, filePath);
     }
 
     private string BuildPrompt(TenantProfile tenant, ReleaseContext releaseContext)
     {
+        _logger.LogDebug("Building prompt for tenant {TenantId}, release {ReleaseVersion}",
+            tenant.TenantId, releaseContext.ReleaseVersion);
+
         var metadata = releaseContext.Metadata;
 
         // Analyze changes affecting tenant's active features WITH DETAILS
@@ -65,6 +89,9 @@ public class LLMReasoningService
         var minorChanges = metadata?.ContentBreakdown
             .Where(c => tenant.ActiveFeatures.Contains(c.LinkedFeatureId) && (c.Severity == "MINOR" || c.Severity == "LOW"))
             .ToList() ?? new();
+
+        _logger.LogDebug("Changes affecting tenant {TenantId}: Critical={Critical}, Major={Major}, Minor={Minor}",
+            tenant.TenantId, criticalChanges.Count, majorChanges.Count, minorChanges.Count);
 
         // Get detailed ticket information
         var relevantTicketDetails = string.Join("\n", releaseContext.RelevantTickets.Take(10).Select(t =>
@@ -201,34 +228,66 @@ You are analyzing whether tenant {tenant.TenantId} should upgrade to {releaseCon
 
     private UpgradeRecommendation ParseRecommendation(string llmResponse, string tenantId, string releaseVersion)
     {
-        // Simple JSON parsing (use System.Text.Json in production)
-        var jsonStart = llmResponse.IndexOf('{');
-        var jsonEnd = llmResponse.LastIndexOf('}') + 1;
-        var json = llmResponse.Substring(jsonStart, jsonEnd - jsonStart);
+        _logger.LogDebug("Parsing LLM response for tenant {TenantId}", tenantId);
 
-        var result = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-
-        if (result == null)
+        try
         {
-            return new UpgradeRecommendation
+            // Simple JSON parsing (use System.Text.Json in production)
+            var jsonStart = llmResponse.IndexOf('{');
+            var jsonEnd = llmResponse.LastIndexOf('}') + 1;
+
+            if (jsonStart == -1 || jsonEnd <= jsonStart)
+            {
+                _logger.LogError("Failed to find JSON in LLM response for tenant {TenantId}", tenantId);
+                return CreateDefaultRecommendation(tenantId, releaseVersion, "Failed to parse LLM response - no JSON found");
+            }
+
+            var json = llmResponse.Substring(jsonStart, jsonEnd - jsonStart);
+            _logger.LogDebug("Extracted JSON for tenant {TenantId}: {Json}", tenantId, json);
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+
+            if (result == null)
+            {
+                _logger.LogError("Failed to deserialize JSON for tenant {TenantId}", tenantId);
+                return CreateDefaultRecommendation(tenantId, releaseVersion, "Failed to parse LLM response - deserialization failed");
+            }
+
+            var recommendation = new UpgradeRecommendation
             {
                 TenantId = tenantId,
                 ReleaseVersion = releaseVersion,
-                Recommendation = "SKIP",
-                Reasoning = "Failed to parse LLM response",
-                AffectedFeatures = new(),
-                EstimatedImpact = "low"
+                Recommendation = result["recommendation"]?.ToString() ?? "SKIP",
+                Reasoning = result["reasoning"]?.ToString() ?? "",
+                AffectedFeatures = System.Text.Json.JsonSerializer.Deserialize<List<string>>(result["affectedFeatures"]?.ToString() ?? "[]") ?? new(),
+                EstimatedImpact = result["estimatedImpact"]?.ToString() ?? "low"
             };
+
+            _logger.LogInformation("Successfully parsed recommendation for tenant {TenantId}: {Recommendation}",
+                tenantId, recommendation.Recommendation);
+
+            return recommendation;
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception while parsing LLM response for tenant {TenantId}", tenantId);
+            return CreateDefaultRecommendation(tenantId, releaseVersion, $"Failed to parse LLM response: {ex.Message}");
+        }
+    }
+
+    private UpgradeRecommendation CreateDefaultRecommendation(string tenantId, string releaseVersion, string errorMessage)
+    {
+        _logger.LogWarning("Creating default SKIP recommendation for tenant {TenantId} due to: {ErrorMessage}",
+            tenantId, errorMessage);
 
         return new UpgradeRecommendation
         {
             TenantId = tenantId,
             ReleaseVersion = releaseVersion,
-            Recommendation = result["recommendation"]?.ToString() ?? "SKIP",
-            Reasoning = result["reasoning"]?.ToString() ?? "",
-            AffectedFeatures = System.Text.Json.JsonSerializer.Deserialize<List<string>>(result["affectedFeatures"]?.ToString() ?? "[]") ?? new(),
-            EstimatedImpact = result["estimatedImpact"]?.ToString() ?? "low"
+            Recommendation = "SKIP",
+            Reasoning = errorMessage,
+            AffectedFeatures = new(),
+            EstimatedImpact = "low"
         };
     }
 }

@@ -7,6 +7,7 @@ using Qdrant.Client.Grpc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace Ai.Orchestrator.Services;
 
@@ -15,9 +16,12 @@ public class QdrantRetrieverService
     private readonly QdrantClient _qdrantClient;
     private readonly string _collectionName;
     private readonly EmbeddingClient _embeddingClient;
+    private readonly ILogger<QdrantRetrieverService> _logger;
 
-    public QdrantRetrieverService(IConfiguration configuration)
+    public QdrantRetrieverService(IConfiguration configuration, ILogger<QdrantRetrieverService> logger)
     {
+        _logger = logger;
+
         var qdrantUrl = configuration["Qdrant:Url"] ?? throw new ArgumentNullException("Qdrant:Url");
         var apiKey = configuration["Qdrant:ApiKey"] ?? throw new ArgumentNullException("Qdrant:ApiKey");
 
@@ -33,6 +37,9 @@ public class QdrantRetrieverService
         );
         _collectionName = configuration["Qdrant:CollectionName"] ?? "jira_tickets";
 
+        _logger.LogInformation("QdrantRetrieverService initialized. Collection: {CollectionName}, Host: {Host}:{Port}",
+            _collectionName, host, port);
+
         // Initialize Azure OpenAI embedding client
         var azureEndpoint = configuration["AzureOpenAI:Endpoint"] ?? throw new ArgumentNullException("AzureOpenAI:Endpoint");
         var azureApiKey = configuration["AzureOpenAI:ApiKey"] ?? throw new ArgumentNullException("AzureOpenAI:ApiKey");
@@ -40,20 +47,27 @@ public class QdrantRetrieverService
 
         var azureClient = new AzureOpenAIClient(new Uri(azureEndpoint), new AzureKeyCredential(azureApiKey));
         _embeddingClient = azureClient.GetEmbeddingClient(embeddingDeployment);
+
+        _logger.LogInformation("Azure OpenAI Embedding client initialized. Deployment: {Deployment}", embeddingDeployment);
     }
 
     public async Task<List<JiraTicket>> GetRelevantTicketsAsync(string releaseVersion, List<string> activeFeatures, TenantProfile tenant)
     {
+        _logger.LogInformation("Starting ticket retrieval for tenant {TenantId}, release {ReleaseVersion}, features: {Features}",
+            tenant.TenantId, releaseVersion, string.Join(", ", activeFeatures));
+
         var allTickets = new List<(JiraTicket ticket, double score)>();
 
         // SEMANTIC SEARCH APPROACH: Since we don't have indexes on metadata fields,
         // we'll use multiple semantic queries targeting specific features and contexts
 
         // 1. Feature-specific semantic searches
+        _logger.LogInformation("Executing feature-specific searches for {FeatureCount} features", activeFeatures.Count);
         foreach (var feature in activeFeatures)
         {
             var featureQuery = $"{releaseVersion} critical bugs and security issues in {feature} feature";
             var featureTickets = await GetSemanticTicketsAsync(featureQuery, limit: 5);
+            _logger.LogDebug("Feature '{Feature}' search returned {TicketCount} tickets", feature, featureTickets.Count);
             foreach (var (ticket, score) in featureTickets)
             {
                 allTickets.Add((ticket, score + 0.3)); // Boost feature-specific results
@@ -62,7 +76,10 @@ public class QdrantRetrieverService
 
         // 2. Contextual semantic search based on tenant profile
         var contextualQuery = BuildSemanticQuery(tenant, activeFeatures, releaseVersion);
+        _logger.LogInformation("Executing contextual semantic search for tenant profile (RiskTolerance: {RiskTolerance}, UsagePattern: {UsagePattern})",
+            tenant.RiskTolerance, tenant.UsagePattern);
         var contextualTickets = await GetSemanticTicketsAsync(contextualQuery, limit: 10);
+        _logger.LogDebug("Contextual search returned {TicketCount} tickets", contextualTickets.Count);
         foreach (var (ticket, score) in contextualTickets)
         {
             allTickets.Add((ticket, score));
@@ -70,7 +87,11 @@ public class QdrantRetrieverService
 
         // 3. Deduplicate, prioritize, and return top results
         // The semantic search with release version in queries will naturally return relevant tickets
-        return allTickets
+        var uniqueTicketCount = allTickets.GroupBy(t => t.ticket.TicketId).Count();
+        _logger.LogInformation("Total tickets retrieved: {TotalCount}, Unique tickets: {UniqueCount}",
+            allTickets.Count, uniqueTicketCount);
+
+        var finalTickets = allTickets
             .GroupBy(t => t.ticket.TicketId)
             .Select(g => new
             {
@@ -81,10 +102,20 @@ public class QdrantRetrieverService
             .Take(15)
             .Select(x => x.Ticket)
             .ToList();
+
+        _logger.LogInformation("Returning top {Count} tickets for tenant {TenantId}", finalTickets.Count, tenant.TenantId);
+        if (finalTickets.Count > 0)
+        {
+            _logger.LogDebug("Top ticket: {TicketId} - {Summary}", finalTickets[0].TicketId, finalTickets[0].Summary);
+        }
+
+        return finalTickets;
     }
 
     private async Task<List<(JiraTicket ticket, double score)>> GetSemanticTicketsAsync(string query, int limit = 10)
     {
+        _logger.LogDebug("Executing semantic search with query: '{Query}', limit: {Limit}", query, limit);
+
         var queryVector = await GetEmbeddingAsync(query);
 
         // Search without filters since we don't have indexes
@@ -94,9 +125,14 @@ public class QdrantRetrieverService
             limit: (ulong)limit
         );
 
-        return searchResults.Select(result =>
+        var results = searchResults.Select(result =>
             (ticket: ConvertToTicket(result), score: (double)result.Score)
         ).ToList();
+
+        _logger.LogDebug("Semantic search returned {ResultCount} results. Top score: {TopScore:F4}",
+            results.Count, results.Count > 0 ? results[0].score : 0);
+
+        return results;
     }
 
     private string BuildSemanticQuery(TenantProfile tenant, List<string> activeFeatures, string releaseVersion)
@@ -120,11 +156,15 @@ public class QdrantRetrieverService
             _ => "Standard usage patterns"
         };
 
-        return $@"{releaseVersion} critical bugs and security vulnerabilities affecting: {featureContext}.
+        var query = $@"{releaseVersion} critical bugs and security vulnerabilities affecting: {featureContext}.
 {criticalityContext}.
 {usageContext}.
 Include: payment processing failures, authentication issues, subscription management bugs,
 billing calculation errors, data loss risks, compliance violations.";
+
+        _logger.LogDebug("Built semantic query for tenant {TenantId}: {Query}", tenant.TenantId, query);
+
+        return query;
     }
 
     private JiraTicket ConvertToTicket(ScoredPoint result)
@@ -176,7 +216,10 @@ billing calculation errors, data loss risks, compliance violations.";
 
     private async Task<float[]> GetEmbeddingAsync(string text)
     {
+        _logger.LogDebug("Generating embedding for text (length: {Length} chars)", text.Length);
         var embeddingResult = await _embeddingClient.GenerateEmbeddingAsync(text);
-        return embeddingResult.Value.ToFloats().ToArray();
+        var embedding = embeddingResult.Value.ToFloats().ToArray();
+        _logger.LogDebug("Generated embedding with {Dimensions} dimensions", embedding.Length);
+        return embedding;
     }
 }
