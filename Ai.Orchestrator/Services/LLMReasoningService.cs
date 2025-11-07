@@ -108,7 +108,7 @@ public class LLMReasoningService
         return $@"
 You are analyzing whether tenant {tenant.TenantId} should upgrade to {releaseContext.ReleaseVersion}.
 
-**IMPORTANT**: Be conservative with MUST recommendations. Only recommend MUST if there are ACTUAL critical bugs affecting this tenant's usage.
+**CRITICAL INSTRUCTION**: Use PROBABILISTIC REASONING. Don't just check if a feature has a bug - assess the LIKELIHOOD that this specific tenant is experiencing the bug based on their usage profile, risk tolerance, and bug characteristics.
 
 **Tenant Profile:**
 - Tenant ID: {tenant.TenantId}
@@ -127,51 +127,72 @@ You are analyzing whether tenant {tenant.TenantId} should upgrade to {releaseCon
 **Detailed Relevant Tickets (RAG Results):**
 {relevantTicketDetails}
 
-**Enhanced Decision Framework:**
+**Probabilistic Decision Framework:**
 
-**MUST Upgrade When:**
-1. CRITICAL security vulnerabilities in actively used features (e.g., authentication bypass, data leak)
-2. CRITICAL data corruption bugs affecting tenant's data (e.g., payment calculation errors for billing-heavy tenants)
-3. Production-breaking bugs that tenant is likely experiencing NOW
-4. Compliance violations that tenant must fix immediately
-5. LOW risk tolerance + CRITICAL bugs in any active feature
+**MUST Upgrade** = HIGH probability (>70%) tenant is experiencing or will soon experience critical impact:
+1. CRITICAL security vulnerability in authentication/payment features they actively use
+2. CRITICAL data corruption/loss bugs in features with HIGH daily usage
+3. Widespread production-breaking bugs reported by multiple similar tenants
+4. Compliance violations with immediate legal/financial consequences
+5. LOW risk tolerance + CRITICAL bug in core business feature (subscription/billing)
 
-**SHOULD Upgrade When:**
-1. MAJOR bug fixes in frequently used features
-2. Important performance improvements for high-usage tenants
-3. MEDIUM risk tolerance + CRITICAL bugs that don't impact current usage
+Examples:
+- ✓ MUST: Payment retry bug causing refunds → tenant uses F4_BillingPayments heavily
+- ✗ NOT MUST: Proration bug for multi-year contracts → tenant only has monthly subscriptions
+
+**SHOULD Upgrade** = MEDIUM probability (30-70%) of impact OR non-critical improvements worth deploying:
+1. MAJOR bugs in frequently used features that affect subset of workflows
+2. Edge case CRITICAL bugs tenant might encounter occasionally
+3. MEDIUM risk tolerance + CRITICAL bugs in lightly-used features
 4. Multiple MAJOR improvements that benefit tenant's workflow
-5. Security patches that are important but not immediately exploitable
-6. CRITICAL bugs in features tenant uses lightly or infrequently
+5. HIGH usage tenants with performance/stability MAJOR fixes
 
-**SKIP Upgrade When:**
-1. Only MINOR/LOW severity changes
-2. Changes to features tenant doesn't use at all
-3. HIGH risk tolerance + only non-critical improvements
-4. New features that tenant hasn't requested
-5. Performance improvements that don't affect tenant's usage pattern
-6. No bugs affecting tenant's specific use case
-7. HIGH deployment complexity + minimal tenant benefit
+Examples:
+- ✓ SHOULD: OAuth refresh bug → tenant uses F1 but may not hit edge case frequently
+- ✓ SHOULD: MRR calculation bug → tenant uses F8 reporting but not mission-critical
+- ✗ NOT SHOULD: Edge case bugs tenant unlikely to encounter
+
+**SKIP Upgrade** = LOW probability (<30%) of impact OR minimal benefit vs. deployment cost:
+1. Only MINOR/PATCH bugs in their features (UI typos, cosmetic issues)
+2. MAJOR/CRITICAL bugs in features they DON'T use at all
+3. HIGH risk tolerance + edge case bugs in non-core features
+4. New features tenant hasn't requested (no value, just deployment risk)
+5. LOW daily usage + only minor improvements
+6. MEDIUM/HIGH deployment complexity + minimal tangible benefit
+
+Examples:
+- ✓ SKIP: CRITICAL bug in F6_InvoicingTax → tenant doesn't use F6
+- ✓ SKIP: MAJOR bug in F5_UsageTracking quota reset → tenant has LOW usage, unlikely to hit quotas
+- ✓ SKIP: MINOR bug in F2_UserManagement → tenant has HIGH risk tolerance, cosmetic issue
+- ✓ SKIP: New F10_TenantAdmin features → tenant hasn't requested, no immediate value
 
 **Risk Tolerance Interpretation:**
-- LOW risk tolerance: Upgrade for CRITICAL issues immediately, SHOULD for MAJOR issues
-- MEDIUM risk tolerance: Upgrade for CRITICAL + MAJOR issues impacting usage
-- HIGH risk tolerance: Only upgrade for severe production-breaking or security issues
+- LOW risk tolerance: Defensive - upgrade for CRITICAL bugs even if unlikely to impact (probability >30%)
+- MEDIUM risk tolerance: Balanced - upgrade if probability of impact >50%
+- HIGH risk tolerance: Aggressive - only upgrade if probability of impact >70% OR severe consequences
 
 **Usage Pattern Interpretation:**
-- HIGH usage: More careful - SHOULD for important stability/performance fixes
-- MEDIUM usage: Standard evaluation - focus on bugs in used features
-- LOW usage: Can SKIP unless CRITICAL security or compliance issue
+- HIGH usage (>70): Higher probability of hitting bugs → SHOULD for MAJOR bugs
+- MEDIUM usage (40-70): Standard probability assessment → focus on common workflows
+- LOW usage (<40): Lower probability of hitting bugs → SKIP unless CRITICAL security/data loss
+
+**Bug Likelihood Assessment Checklist:**
+1. Is this bug affecting a core workflow tenant uses daily? (YES = +40% probability)
+2. Is this bug widespread or an edge case? (Widespread = +30%, Edge case = +5%)
+3. Does tenant's profile match the bug's conditions? (Match = +30%, No match = -50%)
+4. Has tenant reported similar issues before? (If mentioned = +40%)
+5. Is this a data corruption/security bug vs. UX bug? (Data/Security = +20%)
 
 **Current Guidance:**
-- If no tickets match tenant's features: Likely SKIP (unless deployment complexity is LOW and there are nice-to-have improvements)
-- If tickets are mostly for unused features: SKIP
-- Consider deployment impact: MEDIUM/HIGH complexity requires stronger justification
+- Default to SKIP unless you can articulate HIGH or MEDIUM probability of impact
+- Bug severity alone is NOT enough - assess tenant-specific likelihood
+- Consider: ""Would this tenant notice if we don't upgrade?"" If NO → SKIP
+- Consider: ""Is the deployment risk worth the unlikely benefit?"" If NO → SKIP
 
 **Output Format (JSON only):**
 {{
   ""recommendation"": ""MUST|SHOULD|SKIP"",
-  ""reasoning"": ""Explain the decision based on actual ticket impact, NOT just feature overlap. Be specific about which bugs matter for THIS tenant."",
+  ""reasoning"": ""State the PROBABILITY of impact and WHY. Example: 'SKIP: Only MAJOR bug in F5_UsageTracking (quota reset). Tenant has LOW usage (35 daily score), unlikely to hit quota limits. HIGH risk tolerance suggests waiting. No CRITICAL bugs in their features.'"",
   ""affectedFeatures"": [""feature1"", ""feature2""],
   ""estimatedImpact"": ""high|medium|low""
 }}
@@ -205,22 +226,47 @@ You are analyzing whether tenant {tenant.TenantId} should upgrade to {releaseCon
             analysis += $"- **MINOR Changes**: {minor.Count} affecting {string.Join(", ", minor.Select(c => c.LinkedFeatureId).Distinct())}\n";
         }
 
-        // Add contextual recommendation
+        // Add probabilistic contextual recommendation
+        var usageScore = int.Parse(tenant.UsagePattern.ToLower() switch
+        {
+            "high" => "75",
+            "medium" => "50",
+            "low" => "30",
+            _ => "50"
+        });
+
+        analysis += "\n**Probabilistic Impact Assessment:**\n";
+
         if (critical.Any() && tenant.RiskTolerance.ToLower() == "low")
         {
-            analysis += "\n**Preliminary Assessment**: LOW risk tolerance + CRITICAL bugs = likely MUST upgrade.";
+            analysis += "- LOW risk tolerance + CRITICAL bugs = HIGH impact probability (>70%) → likely MUST upgrade.\n";
+            analysis += "- Rationale: Defensive posture requires proactive fixes even for unlikely scenarios.\n";
         }
         else if (critical.Any() && tenant.RiskTolerance.ToLower() == "high")
         {
-            analysis += "\n**Preliminary Assessment**: HIGH risk tolerance + CRITICAL bugs = evaluate if bugs affect current usage (may be SHOULD instead of MUST).";
+            analysis += "- HIGH risk tolerance + CRITICAL bugs = Evaluate bug likelihood carefully.\n";
+            analysis += "- MUST only if tenant likely experiencing bug NOW (check bug description vs. tenant profile).\n";
+            analysis += "- SKIP if bugs are edge cases tenant unlikely to encounter (consider usage patterns).\n";
+        }
+        else if (!critical.Any() && major.Any() && tenant.RiskTolerance.ToLower() == "high")
+        {
+            analysis += $"- HIGH risk tolerance + only MAJOR bugs + usage score {usageScore} = LOW impact probability.\n";
+            analysis += "- Likely SKIP unless: (1) high-frequency workflows affected, (2) data integrity risk, (3) compliance issue.\n";
         }
         else if (!critical.Any() && major.Any())
         {
-            analysis += "\n**Preliminary Assessment**: No CRITICAL issues, only MAJOR = likely SHOULD or SKIP depending on actual bug impact.";
+            analysis += $"- Only MAJOR issues + {tenant.RiskTolerance} risk tolerance + {tenant.UsagePattern} usage = Assess likelihood.\n";
+            analysis += "- SHOULD if: bugs affect daily workflows. SKIP if: edge cases or low usage feature.\n";
         }
         else if (!critical.Any() && !major.Any())
         {
-            analysis += "\n**Preliminary Assessment**: Only MINOR changes = likely SKIP unless deployment is trivial and benefits are clear.";
+            analysis += "- Only MINOR/PATCH changes = VERY LOW impact probability (<10%).\n";
+            analysis += "- Default to SKIP. Cosmetic fixes don't justify deployment risk.\n";
+        }
+
+        if (!critical.Any() && !major.Any() && minor.Any())
+        {
+            analysis += $"\n**Recommendation Hint**: With only MINOR changes and {tenant.RiskTolerance.ToUpper()} risk tolerance, this is a clear SKIP candidate.";
         }
 
         return analysis;
