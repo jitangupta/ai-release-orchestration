@@ -34,8 +34,8 @@ public class RecommendationEngine
 
         foreach (var tenant in tenants)
         {
-            // 1. Retrieve relevant tickets from Qdrant
-            var tickets = await _retriever.GetRelevantTicketsAsync(releaseVersion, tenant.ActiveFeatures);
+            // 1. Retrieve relevant tickets from Qdrant using hybrid approach
+            var tickets = await _retriever.GetRelevantTicketsAsync(releaseVersion, tenant.ActiveFeatures, tenant);
 
             // 2. Build release context with metadata
             var releaseContext = new ReleaseContext
